@@ -4,9 +4,9 @@ import logging
 
 from javsp.web.base import *
 from javsp.web.exceptions import *
-from javsp.core.func import *
-from javsp.core.config import Cfg, CrawlerID
-from javsp.core.datatype import MovieInfo, GenreMap
+from javsp.func import *
+from javsp.config import Cfg, CrawlerID
+from javsp.datatype import MovieInfo, GenreMap
 
 
 logger = logging.getLogger(__name__)
@@ -15,7 +15,7 @@ permanent_url = 'https://www.javbus.com'
 if Cfg().network.proxy_server is not None:
     base_url = permanent_url
 else:
-    base_url = Cfg().network.proxy_free[CrawlerID.javbus]
+    base_url = str(Cfg().network.proxy_free[CrawlerID.javbus])
 
 
 def parse_data(movie: MovieInfo):

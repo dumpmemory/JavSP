@@ -2,12 +2,12 @@ from argparse import ArgumentParser, RawTextHelpFormatter
 from enum import Enum
 from typing import Dict, List, Literal, TypeAlias, Union
 from confz import BaseConfig, CLArgSource, EnvSource, FileSource
-from pydantic import ByteSize, Discriminator, Field, NonNegativeInt, PositiveInt, field_validator
+from pydantic import ByteSize, Field, NonNegativeInt, PositiveInt
 from pydantic_extra_types.pendulum_dt import Duration
 from pydantic_core import Url
 from pathlib import Path
 
-from javsp.core.lib import resource_path
+from javsp.lib import resource_path
 
 class Scanner(BaseConfig):
     ignored_id_pattern: List[str]
@@ -134,37 +134,41 @@ class TitleSummarize(BaseConfig):
     remove_trailing_actor_name: bool
 
 class NFOSummarize(BaseConfig):
+    basename_pattern: str
     title_pattern: str
     custom_genres_fields: list[str]
     custom_tags_fields: list[str]
 
-class Summarizer(BaseConfig):
-    path: PathSummarize
-    default: MovieDefault
-    nfo: NFOSummarize
-    censor_options_representation: list[str]
-    title: TitleSummarize
-    move_files: bool = True
-
-class ExtraFanart(BaseConfig):
+class ExtraFanartSummarize(BaseConfig):
     enabled: bool
     scrap_interval: Duration
 
-class BaiduAipEngine(BaseConfig):
-    name: Literal['baidu_aip']
-    app_id: str
-    api_key: str
-    secret_key: str
+class SlimefaceEngine(BaseConfig):
+    name: Literal['slimeface']
 
-class MediaCrop(BaseConfig):
-  engine: BaiduAipEngine | None
+class CoverCrop(BaseConfig):
+  engine: SlimefaceEngine | None
   on_id_pattern: list[str]
 
-class MediaSanitizer(BaseConfig):
-    highres_covers: bool
-    extra_fanarts: ExtraFanart
-    crop: MediaCrop
-    add_label_to_cover: bool
+class CoverSummarize(BaseConfig):
+    basename_pattern: str
+    highres: bool
+    add_label: bool
+    crop: CoverCrop
+
+class FanartSummarize(BaseConfig):
+    basename_pattern: str
+
+class Summarizer(BaseConfig):
+    default: MovieDefault
+    censor_options_representation: list[str]
+    title: TitleSummarize
+    move_files: bool = True
+    path: PathSummarize
+    nfo: NFOSummarize
+    cover: CoverSummarize
+    fanart: FanartSummarize
+    extra_fanarts: ExtraFanartSummarize
 
 class BaiduTranslateEngine(BaseConfig):
     name: Literal['baidu']
@@ -205,6 +209,7 @@ class Translator(BaseConfig):
     fields: TranslateField
 
 class Other(BaseConfig):
+    interactive: bool
     check_update: bool
     auto_update: bool
 
@@ -225,7 +230,6 @@ class Cfg(BaseConfig):
     network: Network
     crawler: Crawler
     summarizer: Summarizer
-    media_sanitizer: MediaSanitizer
     translator: Translator
     other: Other
     CONFIG_SOURCES=get_config_source()
